@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game</title>
+    <style>
+        body {
+            background-image: url('bck.jpg'); /* Remplacez le chemin par l'emplacement de votre image */
+            background-size: cover; /* Ajuste la taille de l'image pour couvrir tout le fond */
+            background-repeat: no-repeat; /* Empêche la répétition de l'image */
+        }
+        table {
+            border-collapse: collapse;
+            width: 50%;
+            margin: 20px auto;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        th, td {
+            width: 25%;
+            height: 100px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px;
+        }
+
+        #timer {
+            text-align: center;
+            font-size: 20px;
+            margin-top: 20px;
+        }
+
+        #result {
+            text-align: center;
+            font-size: 24px;
+            margin-top: 20px;
+        }
+
+        #result.winner {
+            color: green;
+        }
+
+        #result.loser {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="timer">0:00</div>
+    <div id="result"></div>
+
+    <table id="imageTable">
+        <tr>
+            <td onclick="selectImage(this)"><img src="img1.png" alt="Image 1" data-id="1" class="hidden"></td>
+            <td onclick="selectImage(this)"><img src="img1.png" alt="Image 1" data-id="1" class="hidden"></td>
+            <td onclick="selectImage(this)"><img src="img2.png" alt="Image 2" data-id="2" class="hidden"></td>
+            <td onclick="selectImage(this)"><img src="img2.png" alt="Image 2" data-id="2" class="hidden"></td>
+        </tr>
+        <tr>
+            <td onclick="selectImage(this)"><img src="img3.png" alt="Image 3" data-id="3" class="hidden"></td>
+            <td onclick="selectImage(this)"><img src="img3.png" alt="Image 3" data-id="3" class="hidden"></td>
+            <td onclick="selectImage(this)"><img src="img4.png" alt="Image 4" data-id="4" class="hidden"></td>
+            <td onclick="selectImage(this)"><img src="img4.png" alt="Image 4" data-id="4" class="hidden"></td>
+        </tr>
+        <tr>
+            <td onclick="selectImage(this)"><img src="img5.png" alt="Image 5" data-id="5" class="hidden"></td>
+            <td onclick="selectImage(this)"><img src="img5.png" alt="Image 5" data-id="5" class="hidden"></td>
+            <td onclick="selectImage(this)"><img src="img6.png" alt="Image 6" data-id="6" class="hidden"></td>
+            <td onclick="selectImage(this)"><img src="img6.png" alt="Image 6" data-id="6" class="hidden"></td>
+        </tr>
+    </table>
+
+    <button onclick="startGame();letsgo()">Let's Play</button>
+
+    <script>
+        var selectedImages = [];
+        var timerInterval;
+        var startTime;
+        var timeLimit = 60; // Limite de temps en secondes (1 minute)
+
+        function startGame() {
+            resetGame();
+
+            randomizeImages(); // Changer l'ordre des images aléatoirement
+            showAllImages();   // Afficher toutes les images
+
+            startTime = new Date().getTime() / 1000; // Convertir en secondes
+            timerInterval = setInterval(updateTimer, 1000); // Mettre à jour le chronomètre chaque seconde
+        }
+
+        function resetGame() {
+            clearInterval(timerInterval); // Arrêter le chronomètre actuel
+            selectedImages = [];
+            document.getElementById("result").innerText = "";
+            document.getElementById("result").classList.remove("winner", "loser");
+        }
+
+        function updateTimer() {
+            var currentTime = new Date().getTime() / 1000; // Convertir en secondes
+            var elapsedTime = currentTime - startTime;
+
+            var minutes = Math.floor(elapsedTime / 60);
+            var seconds = Math.floor(elapsedTime % 60);
+
+            document.getElementById("timer").innerText = minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+
+            // Vérifier si toutes les images sont apparues
+            var allImagesVisible = areAllImagesVisible();
+            if (elapsedTime >= timeLimit && !allImagesVisible) {
+                endGame(false); // Temps écoulé, images non toutes visibles
+            } else if (allImagesVisible) {
+                endGame(true); // Toutes les images sont apparues dans le temps imparti
+            }
+        }
+
+        function areAllImagesVisible() {
+            var table = document.getElementById("imageTable");
+            var images = table.getElementsByTagName("img");
+
+            for (var i = 0; i < images.length; i++) {
+                if (images[i].classList.contains("hidden")) {
+                    return false; // Il y a au moins une image cachée
+                }
+            }
+            return true; // Toutes les images sont visibles
+        }
+
+        function endGame(isWinner) {
+            clearInterval(timerInterval); // Arrêter le chronomètre
+            if (isWinner) {
+                document.getElementById("result").innerText = "BRAVO CHAMPION!\nScore: " + document.getElementById("timer").innerText;
+                document.getElementById("result").classList.add("winner");
+            } else {
+                document.getElementById("result").innerText = "DÉSOLÉ, LE TEMPS EST FINI !!!!!";
+                document.getElementById("result").classList.add("loser");
+            }
+        }
+
+        function randomizeImages() {
+            var table = document.getElementById("imageTable");
+            for (var i = table.rows.length - 1; i > 0; i--) {
+                for (var j = table.rows[i].cells.length - 1; j > 0; j--) {
+                    var randRow = Math.floor(Math.random() * (i + 1));
+                    var randCol = Math.floor(Math.random() * (j + 1));
+
+                    var temp = table.rows[i].cells[j].innerHTML;
+                    table.rows[i].cells[j].innerHTML = table.rows[randRow].cells[randCol].innerHTML;
+                    table.rows[randRow].cells[randCol].innerHTML = temp;
+                }
+            }
+        }
+
+        function showAllImages() {
+            var table = document.getElementById("imageTable");
+            var images = table.getElementsByTagName("img");
+
+            for (var i = 0; i < images.length; i++) {
+                images[i].classList.remove("hidden");
+            }
+
+            // Cacher les images après un court délai
+            setTimeout(function() {
+                for (var i = 0; i < images.length; i++) {
+                    images[i].classList.add("hidden");
+                }
+            }, 2000); // Attendre 2 secondes avant de cacher les images (vous pouvez ajuster cette valeur selon vos besoins)
+        }
+
+        function selectImage(cell) {
+            var image = cell.querySelector('img');
+
+            // Vérifier si l'image est déjà sélectionnée
+            if (selectedImages.includes(image)) {
+                return;
+            }
+
+            // Ajouter l'image à la liste des images sélectionnées
+            selectedImages.push(image);
+
+            // Afficher l'image
+            image.classList.remove("hidden");
+
+            // Vérifier si deux images sont sélectionnées
+            if (selectedImages.length === 2) {
+                // Comparer les ID des deux images
+                if (selectedImages[0].getAttribute('data-id') === selectedImages[1].getAttribute('data-id')) {
+                    // Les images ont le même ID, réinitialiser la liste des images sélectionnées
+                    selectedImages = [];
+                } else {
+                    // Les images n'ont pas le même ID, cacher les images à nouveau après un court délai
+                    setTimeout(function() {
+                        selectedImages.forEach(function(selectedImage) {
+                            selectedImage.classList.add("hidden");
+                        });
+                        selectedImages = []; // Réinitialiser la liste des images sélectionnées
+                    }, 1000); // Attendre 1 seconde avant de cacher les images à nouveau (vous pouvez ajuster cette valeur selon vos besoins)
+                }
+            }
+        }
+        function letsgo() {
+            randomizeImages(); // Changer l'ordre des images aléatoirement
+            var table = document.getElementById("imageTable");
+            var images = table.getElementsByTagName("img");
+
+            // Afficher toutes les images
+            for (var i = 0; i < images.length; i++) {
+                images[i].classList.remove("hidden");
+            }
+
+            // Cacher les images après un court délai
+            setTimeout(function() {
+                for (var i = 0; i < images.length; i++) {
+                    images[i].classList.add("hidden");
+                }
+            }, 700); // Attendre 2 secondes avant de cacher les images (vous pouvez ajuster cette valeur selon vos besoins)
+            function randomizeImages() {
+                var table = document.getElementById("imageTable");
+                for (var i = table.rows.length - 1; i > 0; i--) {
+                    for (var j = table.rows[i].cells.length - 1; j > 0; j--) {
+                        var randRow = Math.floor(Math.random() * (i + 1));
+                        var randCol = Math.floor(Math.random() * (j + 1));
+            
+                        var temp = table.rows[i].cells[j].innerHTML;
+                        table.rows[i].cells[j].innerHTML = table.rows[randRow].cells[randCol].innerHTML;
+                        table.rows[randRow].cells[randCol].innerHTML = temp;
+                    }
+                }
+            }
+        }
+    </script>
+
+</body>
+</html>
+

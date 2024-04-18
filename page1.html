@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAME</title>
+    <link rel="stylesheet" href="page.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+<body>
+    
+    <div id="logo">
+        <img src="BASICLOGO.png" id="logo1">
+        <a href="hangman.html"><img src="HUNGMAN.png" alt="HUNG" id="hang" onmouseover="changeBackground('hangbg.jpg'),setTimeout(onmouseout,3000)" onmouseout="restoreBackground()"></a>
+        <img src="MAZE.png" alt="maze" id="maze" onmouseover="changeBackground('mazebg.jpg')" onmouseout="restoreBackground()"></a>
+        <a href="MemoryGame.html"><img src="BRAIN.png" alt="brain" id="brain" onmouseover="changeBackground('memori.jpg')" onmouseout="restoreBackground()"></a>
+        <a href="xo.html"><img src="LOGO.png" alt="logo" id="logoo" onmouseover="changeBackground('xo.jpg')" onmouseout="restoreBackground()"></a>
+    </div>
+    <p id="h11">Game on</p>
+    <script src="page1.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script>
+        const elts = {
+            text1: document.getElementById("h11"),
+            text2: document.getElementById("h11")
+        };
+
+        let textIndex = 0;
+        let time = new Date();
+        let morph = 0;
+        let cooldown = 0.5;
+
+        function updateName() {
+            const nameInput = document.getElementById('nameInput').value;
+            const greeting = `Hello ${nameInput}!`;
+            textIndex = 0; // Reset the index
+            elts.text1.textContent = greeting;
+            elts.text2.textContent = greeting;
+        }
+
+        function doMorph() {
+            morph -= cooldown;
+            cooldown = 0;
+
+            let fraction = morph / 1;
+
+            if (fraction > 1) {
+                cooldown = 2;
+                fraction = 1;
+            }
+
+            setMorph(fraction);
+        }
+
+        function setMorph(fraction) {
+            elts.text2.style.filter = `blur(${Math.min(8 / fraction - 8, 100)}px)`;
+            elts.text2.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
+
+            fraction = 1 - fraction;
+            elts.text1.style.filter = `blur(${Math.min(8 / fraction - 8, 100)}px)`;
+            elts.text1.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
+        }
+
+        function doCooldown() {
+            morph = 0;
+
+            elts.text2.style.filter = "";
+            elts.text2.style.opacity = "100%";
+
+            elts.text1.style.filter = "";
+            elts.text1.style.opacity = "0%";
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            let newTime = new Date();
+            let shouldIncrementIndex = cooldown > 0;
+            let dt = (newTime - time) / 1000;
+            time = newTime;
+
+            cooldown -= dt;
+
+            if (cooldown <= 0) {
+                doMorph();
+            } else {
+                doCooldown();
+            }
+        }
+        animate();
+    </script>
+</body>
+</html>
